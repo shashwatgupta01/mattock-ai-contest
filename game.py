@@ -30,7 +30,7 @@ class Game:
         wait_full_time: bool = False,
     ):
         self.players = {Space.RED: red, Space.BLUE: blue}  # red, blue
-        self.red_turn = True
+        self.red_turn = False
         self.board = Board(small)
         self.winner: Space | None = None
         self.time_per_move = time_per_move
@@ -48,7 +48,8 @@ class Game:
             return
         # Current player needs to dig out a space
         with Pool(processes=2) as pool:
-            delay = pool.apply_async(time.sleep, (self.time_per_move,))
+            if self.wait_full_time:
+                delay = pool.apply_async(time.sleep, (self.time_per_move,))
             mine_res = pool.apply_async(
                 player.mine, (deepcopy(self.board), player_color)
             )
@@ -79,7 +80,8 @@ class Game:
         )
         # Current player may move
         with Pool(processes=2) as pool:
-            delay = pool.apply_async(time.sleep, (self.time_per_move,))
+            if self.wait_full_time:
+                delay = pool.apply_async(time.sleep, (self.time_per_move,))
             move_res = pool.apply_async(
                 player.move, (deepcopy(self.board), player_color)
             )
@@ -109,7 +111,14 @@ class Game:
                 )
                 self.winner = other_color
                 return
+            self.board[move_start] = Space.EMPTY
+            self.board[move_end] = player_color
         # Clear dead enemies
+        self.clear_dead(other_color)
+        # Switch players
+        self.red_turn = not self.red_turn
+
+    def clear_dead(self, other_color: Space):
         dead_enemies = {
             coord
             for coord in self.board.cells
@@ -117,28 +126,3 @@ class Game:
         }
         for enemy in dead_enemies:
             self.board[enemy] = Space.EMPTY
-        # Switch players
-        self.red_turn = not self.red_turn
-
-
-class Foo:
-
-    def __init__(self):
-        self.name = "boris"
-
-    def mine(self, board: Board, color: Space) -> Coordinate:
-        time.sleep(3)
-        print("hi")
-        return (0, 0)
-
-    def move(self, board: Board, color: Space) -> tuple[Coordinate, Coordinate] | None:
-        return (0, 0), (0, 1)
-
-
-def main():
-    g = Game(Foo(), Foo(), time_per_move=5, wait_full_time=True)
-    g.step()
-
-
-if __name__ == "__main__":
-    main()

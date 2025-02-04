@@ -34,11 +34,11 @@ def _hex_neighbors(coord: CompoundCoordinate) -> list[FullCoordinate]:
 class Board:
 
     def __init__(self, small: bool = False):
-        size = 5 if small else 7
+        self.size = 5 if small else 7
         self.miner_count = 3 if small else 6
         self.cells: dict[FullCoordinate, Space] = {}
         frontier = [(0, 0, 0)]
-        for _ in range(size - 1):
+        for _ in range(self.size - 1):
             next_frontier = []
             while frontier:
                 curr = frontier.pop()
@@ -49,7 +49,7 @@ class Board:
                     next_frontier.append(neighbor)
             frontier = next_frontier
         red_miners = [(1, -3), (2, 1), (-3, 2), (6, -4), (-4, -2), (-2, 6)]
-        blue_miners = [(-1, 3), (-2, -1), (3, -2), (-6, 4), (4, 2), (2, 6)]
+        blue_miners = [(-1, 3), (-2, -1), (3, -2), (-6, 4), (4, 2), (2, -6)]
         for cell in red_miners:
             if cell in self:
                 self[cell] = Space.RED
@@ -58,7 +58,7 @@ class Board:
                 self[cell] = Space.BLUE
 
     def count_elements(self, element: Space) -> int:
-        return len({c for c in self.cells.values() if c == element})
+        return len([c for c in self.cells.values() if c == element])
 
     def _full_coordinate(self, coord: CompoundCoordinate) -> FullCoordinate:
         if len(coord) == 2:
@@ -126,11 +126,11 @@ class Board:
     def is_mineable(self, coord: CompoundCoordinate) -> bool:
         if self[coord] != Space.WALL:
             return False
-        empty_neighbors = self.neighbors(coord, Space.EMPTY)
+        empty_neighbors = self.neighbors(coord, Space.EMPTY) | self.neighbors(coord, Space.RED) | self.neighbors(coord, Space.BLUE)
         if len(empty_neighbors) > 3:
             return False
         for n in empty_neighbors:
-            if len(self.neighbors(n, Space.EMPTY)) >= 3:
+            if len(self.neighbors(n, Space.EMPTY) | self.neighbors(n, Space.RED) | self.neighbors(n, Space.BLUE)) >= 3:
                 return False
         return True
 
@@ -157,7 +157,7 @@ class Board:
             curr = frontier.pop()
             curr = curr[:2]
             visited.add(curr)
-            if self[curr] == player:
+            if self[curr] == player and curr != coord[:2]:
                 return False
             if self[curr] == other_player:
                 enemy_count += 1
