@@ -39,6 +39,7 @@ class Game:
     def step(self):
         if self.winner:
             return
+        available_time = self.time_per_move
         player_color = Space.RED if self.red_turn else Space.BLUE
         other_color = Space.BLUE if self.red_turn else Space.RED
         player = self.players[player_color]

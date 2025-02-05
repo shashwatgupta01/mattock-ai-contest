@@ -1,12 +1,8 @@
 import numpy as np
 
-# PyGame template.
-
-# Import standard modules.
 import runpy
 import sys
 
-# Import non-standard modules.``
 import pygame
 
 from board import Space
@@ -67,7 +63,7 @@ def runPyGame(game: Game):
     width, height = 800, 800
     screen = pygame.display.set_mode((width, height))
 
-    while True: 
+    while True:
         update()
         draw(screen, game)
         if game.winner is None:
@@ -76,7 +72,7 @@ def runPyGame(game: Game):
 
 def main():
     player_a, player_b = RandomPlayer(), RandomPlayer()
-    game = Game(player_a, player_b, time_per_move=0.1, wait_full_time=True, small=True)
+    game = Game(player_a, player_b, time_per_move=0.5, wait_full_time=True, small=False)
     runPyGame(game)
 
 
