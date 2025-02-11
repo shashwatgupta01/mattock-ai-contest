@@ -1,4 +1,5 @@
 from copy import deepcopy
+import logging
 import time
 import traceback
 from typing import Protocol
@@ -48,16 +49,15 @@ class Game:
             self.winner = other_color
             return
         # Current player needs to dig out a space
-        with Pool(processes=2) as pool:
-            if self.wait_full_time:
-                delay = pool.apply_async(time.sleep, (self.time_per_move,))
+        with Pool(processes=1) as pool:
             mine_res = pool.apply_async(
                 player.mine, (deepcopy(self.board), player_color)
             )
             try:
-                if self.wait_full_time:
-                    delay.get()
-                mine_coord = mine_res.get(1)
+                start_time = time.monotonic()
+                mine_coord = mine_res.get(available_time)
+                end_time = time.monotonic()
+                available_time -= end_time - start_time
             # Player crashed or timed out
             except TimeoutError:
                 self.winner = other_color
@@ -82,14 +82,14 @@ class Game:
         # Current player may move
         with Pool(processes=2) as pool:
             if self.wait_full_time:
-                delay = pool.apply_async(time.sleep, (self.time_per_move,))
+                delay = pool.apply_async(time.sleep, (available_time,))
             move_res = pool.apply_async(
                 player.move, (deepcopy(self.board), player_color)
             )
             try:
                 if self.wait_full_time:
                     delay.get()
-                move = move_res.get(1)
+                move = move_res.get(available_time)
             # player crashed or timed out
             except TimeoutError:
                 self.winner = other_color

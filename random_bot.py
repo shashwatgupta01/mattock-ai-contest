@@ -1,4 +1,5 @@
 from random import choice
+import time
 from board import Board, Space, Coordinate
 
 
@@ -11,14 +12,14 @@ class RandomPlayer:
         RandomPlayer.count += 1
 
     def mine(self, board: Board, color: Space) -> Coordinate:
+        time.sleep(2)
         mineable = board.mineable_by_player(color)
         return choice(tuple(mineable))
 
     def move(self, board: Board, color: Space) -> tuple[Coordinate, Coordinate] | None:
-        return None
-        # pieces = board.find_all(color)
-        # start = choice(tuple(pieces))
-        # ends = board.walkable_from_coord(start)
-        # if len(ends) == 0:
-        #     return None
-        # return start, choice(tuple(ends))
+        pieces = board.find_all(color)
+        start = choice(tuple(pieces))
+        ends = board.walkable_from_coord(start)
+        if len(ends) == 0:
+            return None
+        return start, choice(tuple(ends))

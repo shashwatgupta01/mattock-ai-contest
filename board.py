@@ -1,4 +1,3 @@
-import copy
 from enum import Enum
 
 
@@ -126,11 +125,22 @@ class Board:
     def is_mineable(self, coord: CompoundCoordinate) -> bool:
         if self[coord] != Space.WALL:
             return False
-        empty_neighbors = self.neighbors(coord, Space.EMPTY) | self.neighbors(coord, Space.RED) | self.neighbors(coord, Space.BLUE)
+        empty_neighbors = (
+            self.neighbors(coord, Space.EMPTY)
+            | self.neighbors(coord, Space.RED)
+            | self.neighbors(coord, Space.BLUE)
+        )
         if len(empty_neighbors) > 3:
             return False
         for n in empty_neighbors:
-            if len(self.neighbors(n, Space.EMPTY) | self.neighbors(n, Space.RED) | self.neighbors(n, Space.BLUE)) >= 3:
+            if (
+                len(
+                    self.neighbors(n, Space.EMPTY)
+                    | self.neighbors(n, Space.RED)
+                    | self.neighbors(n, Space.BLUE)
+                )
+                >= 3
+            ):
                 return False
         return True
 
