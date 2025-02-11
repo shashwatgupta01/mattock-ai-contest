@@ -1,5 +1,4 @@
 from copy import deepcopy
-import logging
 import time
 import traceback
 from typing import Protocol
@@ -127,3 +126,7 @@ class Game:
         }
         for enemy in dead_enemies:
             self.board[enemy] = Space.EMPTY
+
+    def play_game(self):
+        while not self.winner:
+            self.step()
