@@ -1,6 +1,5 @@
 import numpy as np
 
-import runpy
 import sys
 
 import pygame
@@ -72,7 +71,7 @@ def runPyGame(game: Game):
 
 def main():
     player_a, player_b = RandomPlayer(), RandomPlayer()
-    game = Game(player_a, player_b, time_per_move=1, wait_full_time=True, small=True)
+    game = Game(player_a, player_b, time_per_move=3, add_sleep=True, small=True, min_sleep_time=2)
     runPyGame(game)
 
 
