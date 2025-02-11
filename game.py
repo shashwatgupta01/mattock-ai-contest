@@ -127,6 +127,7 @@ class Game:
         for enemy in dead_enemies:
             self.board[enemy] = Space.EMPTY
 
-    def play_game(self):
+    def play_game(self) -> Space:
         while not self.winner:
             self.step()
+        return self.winner

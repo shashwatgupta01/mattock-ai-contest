@@ -1,5 +1,4 @@
 from random import choice
-import time
 from board import Board, Space, Coordinate
 
 
@@ -12,7 +11,6 @@ class RandomPlayer:
         RandomPlayer.count += 1
 
     def mine(self, board: Board, color: Space) -> Coordinate:
-        time.sleep(2)
         mineable = board.mineable_by_player(color)
         return choice(tuple(mineable))
 
