@@ -313,3 +313,12 @@ class Board:
                 continue
             frontier |= self.neighbors(curr) - visited
         return enemy_count >= 2
+
+    def clear_dead(self, other_color: Space):
+        dead_enemies = {
+            coord
+            for coord in self.cells
+            if self[coord] == other_color and self.is_miner_dead(coord)
+        }
+        for enemy in dead_enemies:
+            self[enemy] = Space.EMPTY
