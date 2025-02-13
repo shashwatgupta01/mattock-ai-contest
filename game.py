@@ -27,16 +27,14 @@ class Game:
         blue: Player,
         small: bool = False,
         time_per_move: float = 1.0,
-        add_sleep: bool = False,
-        min_sleep_time: float | None = None,
+        min_sleep_time: float = 0.0,
     ):
         self.players = {Space.RED: red, Space.BLUE: blue}  # red, blue
         self.red_turn = False
         self.board = Board(small)
         self.winner: Space | None = None
         self.time_per_move = time_per_move
-        self.wait_full_time = add_sleep
-        self.min_sleep_time = min_sleep_time if min_sleep_time else self.time_per_move
+        self.min_sleep_time = min_sleep_time
 
     def step(self):
         if self.winner:
@@ -82,7 +80,7 @@ class Game:
         )
         # Current player may move
         with Pool(processes=2) as pool:
-            if self.wait_full_time:
+            if self.min_sleep_time > 0:
                 sleep_time = max(
                     0,
                     min(
@@ -95,7 +93,7 @@ class Game:
                 player.move, (deepcopy(self.board), player_color)
             )
             try:
-                if self.wait_full_time:
+                if self.min_sleep_time > 0:
                     delay.get()
                 move = move_res.get(available_time)
             # player crashed or timed out
