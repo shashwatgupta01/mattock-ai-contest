@@ -26,7 +26,7 @@ class Game:
         red: Player,
         blue: Player,
         small: bool = False,
-        time_per_move: float = 2.0,
+        time_per_move: float = 3.0,
         reserve_time: float = 10.0,
         min_sleep_time: float = 0.0,
     ):
