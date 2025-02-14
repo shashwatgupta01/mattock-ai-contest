@@ -76,7 +76,7 @@ class Board:
     def __hash__(self) -> int:
         return hash(frozenset(self.cells.items()))
 
-    def __deepcopy__(self) -> "Board":
+    def copy(self) -> "Board":
         out = Board.__new__(Board)
         out.size = self.size
         out.miner_count = self.miner_count
