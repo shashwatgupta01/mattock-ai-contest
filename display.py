@@ -6,6 +6,7 @@ import pygame
 
 from board import Space
 from game import Game
+from bot import bot
 from random_bot import RandomPlayer
 
 
@@ -72,7 +73,7 @@ def runPyGame(game: Game):
 
 
 def main():
-    player_a, player_b = RandomPlayer(), RandomPlayer()
+    player_a, player_b = RandomPlayer(), bot()
     game = Game(player_a, player_b, time_per_move=3, reserve_time=10, small=True, min_sleep_time=0.5)
     runPyGame(game)
 

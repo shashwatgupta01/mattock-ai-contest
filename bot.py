@@ -3,11 +3,22 @@ from copy import copy, deepcopy
 import math
 
 class bot:
+    
+    count = 0
 
-    def minimax(self, board: Board, depth: int, alpha, beta, maximizing_player: bool, color: Space) -> tuple[Coordinate | None, tuple[Coordinate, Coordinate] | None, float]:
+    def __init__(self, artificial_delay: float = 0):
+        self.name = f"rando_{bot.count}"
+        self.artificial_delay = artificial_delay
+        bot.count += 1
 
+    def minimax(self, board: Board, depth: int, alpha: float, beta: float, maximizing_player: bool, color: Space) -> tuple[Coordinate | None, None | tuple[Coordinate, Coordinate] | None, float]:
+        #I think the maximizing_player boolean should take care of which player we are, so we should pick either maximizing player or color dependency. 
+        #(Same comment) I think we should pick color dependency, so that way evaluate works for certain colors and minimize will still pick the smallest number. 
+        #I also think we should maximize a few things with saving a copy of the previous board and running it compared to evaluate. A lot of the 
+        #heuristy values are dependant on if they are better than last board or not. Ex. if move made was our highest valued closest_enemy then that should return highest eval. 
+        #also if the amount of mineable_by_player spaces increases compared to previous board, then evaluated higher. 
         if depth == 0 or not board.mineable_by_player(color):
-            return None, self.evaluate(board, color)
+            return None, None, self.evaluate(board, color)
 
         possible_mine = list(board.mineable_by_player(color))
         player_locations = board.find_all(color)
@@ -63,8 +74,10 @@ class bot:
     def evaluate(self, board: Board, color: Space) -> float:
         red_spaces = board.find_all(Space.RED)
         blue_spaces = board.find_all(Space.BLUE)
+        #dead players
         red_player_dead = False
         blue_player_dead = False
+        dead_weight = 0
         for red in red_spaces:
             red_player_dead = board.is_miner_dead(red) 
             if red_player_dead: 
@@ -78,7 +91,13 @@ class bot:
                 dead_weight = -10 
             elif blue_player_dead: 
                 dead_weight = 10
-
+        if color == Space.BLUE:
+            if blue_player_dead: 
+                dead_weight = -10 
+            elif red_player_dead: 
+                dead_weight = 10
+        #next to opponent (also do next to opponent and mineable_by_player spaces increases)
+        return dead_weight
         self.closest_enemy(board, color)
         ...
     
@@ -124,6 +143,13 @@ class bot:
                     curr_value *= -1
                 out.append((coordinates[i][0], curr_value)) 
         return out
+    
+    def mine(self, board: Board, color: Space) -> Coordinate:
+        return self.minimax(board, 3, 0, 0, True, color)[0]
+    
+    def move(self, board: Board, color: Space) -> tuple[Coordinate, Coordinate]:
+        return self.minimax(board, 3, 0, 0, True, color)[1]
+
     
     def closest_teammate(self, Board) -> Coordinate:
         ...
