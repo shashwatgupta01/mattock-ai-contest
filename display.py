@@ -74,7 +74,7 @@ def runPyGame(game: Game):
 
 
 def main():
-    player_a, player_b = bot2(), bot()
+    player_a, player_b = bot(), RandomPlayer()
     game = Game(player_a, player_b, time_per_move=3, reserve_time=10, small=True, min_sleep_time=.5)
     runPyGame(game)
 

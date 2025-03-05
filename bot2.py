@@ -1,5 +1,7 @@
 from board import Board, Space, Coordinate
+from copy import copy, deepcopy
 import math
+from random import choice
 
 class bot2:
     count = 0
@@ -9,9 +11,16 @@ class bot2:
         self.artificial_delay = artificial_delay
         bot2.count += 1
 
-    def minimax(self, prev_board: Board, board: Board, depth: int, alpha: float, beta: float, maximizing_player: bool, color: Space) -> tuple[Coordinate | None, None | tuple[Coordinate, Coordinate] | None, float]:
+    def minimax(self, prev_board: Board, board: Board, depth: int, alpha: float, beta: float, maximizing_player: bool, color: Space) -> tuple[Coordinate | None, tuple[Coordinate, Coordinate] | None, float]:
         if depth == 0 or not board.mineable_by_player(color):
-            return None, None, self.evaluate(prev_board, board, color)
+            pieces = board.find_all(color)
+            start = choice(tuple(pieces))
+            ends = board.walkable_from_coord(start)
+            if len(ends) == 0:
+                x = None
+            else: 
+                x = (start, choice(tuple(ends)))
+            return choice(tuple(board.mineable_by_player(color))), x, self.evaluate(prev_board, board, color)
 
         possible_mine = list(board.mineable_by_player(color))
         player_locations = board.find_all(color)
@@ -62,9 +71,8 @@ class bot2:
         # Check if destination is within bounds of the board
         if not self.is_within_bounds(board, dest):
             return False
-        
         # Check if the destination is empty or can be occupied by the player's piece
-        if board[dest] != Space.EMPTY and board[dest] != color:
+        if board[dest] not in board.walkable_from_coord(location):
             return False
         
         return True
@@ -72,8 +80,8 @@ class bot2:
     def is_within_bounds(self, board: Board, coord: Coordinate) -> bool:
         # Assuming board has a fixed grid size, for example: 8x8
         # You can replace these values with the actual board dimensions if they are different
-        board_width = len(board.grid)  # Assuming 'grid' is a 2D array representation of the board
-        board_height = len(board.grid[0]) if board.grid else 0
+        board_width = 5  # Assuming 'grid' is a 2D array representation of the board
+        board_height = 5
         
         x, y = coord
         return 0 <= x < board_width and 0 <= y < board_height
@@ -99,7 +107,7 @@ class bot2:
         # Walking weight: prioritize movement toward enemy
         enemy_positions = board.find_all(enemy_color)  # Cache enemy locations
         walking_weight = sum(5000 for walkable in board.walkable_by_player(color)
-                             if any(self.distance(walkable, enemy) == 1 for enemy in enemy_positions))
+            if any(self.distance(walkable, enemy) == 1 for enemy in enemy_positions))
 
         return general_weight + dead_weight + walking_weight
 
