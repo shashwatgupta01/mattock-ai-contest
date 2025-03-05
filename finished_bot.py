@@ -2,13 +2,13 @@ from board import Board, Space, Coordinate
 from copy import deepcopy
 import math
 
-class bot2:
+class finished_bot:
     count = 0
 
     def __init__(self, artificial_delay: float = 0):
-        self.name = f"rando_{bot2.count}"
+        self.name = f"rando_{finished_bot.count}"
         self.artificial_delay = artificial_delay
-        bot2.count += 1
+        finished_bot.count += 1
 
     def minimax(self, prev_board: Board, board: Board, depth: int, alpha: float, beta: float, maximizing_player: bool, color: Space) -> tuple[Coordinate | None, float]:
         if depth == 0 or not board.mineable_by_player(color):
@@ -62,9 +62,9 @@ class bot2:
         
         if maximizing_player:
             max_eval = -math.inf
-            board_copy = deepcopy(board)
             for location in player_locations:
                 for dest in board.walkable_from_coord(location):
+                    board_copy = deepcopy(board)
                     board_copy[location], board_copy[dest] = Space.EMPTY, color
                     current_eval = self.movemax(board, board_copy, depth - 1, alpha, beta, False, other_color)[1]
                     
@@ -81,9 +81,9 @@ class bot2:
         
         else:
             min_eval = math.inf
-            board_copy = deepcopy(board)
             for location in player_locations:
                 for dest in board.walkable_from_coord(location):
+                    board_copy = deepcopy(board)
                     board_copy[location], board_copy[dest] = Space.EMPTY, color
                     current_eval = self.movemax(board, board_copy, depth - 1, alpha, beta, True, other_color)[1]
                     
@@ -99,10 +99,16 @@ class bot2:
             return best_move, min_eval
 
     def evaluate(self, prev_board: Board, board: Board, color: Space) -> float:
-        red_mineable = len(board.mineable_by_player(Space.RED))
-        blue_mineable = len(board.mineable_by_player(Space.BLUE))
-        #dead_weight = 300 * len(board.is_miner_dead(Space.BLUE) - board.is_miner_dead(Space.RED))
-        general_weight = 40 * red_mineable - 20 * blue_mineable if color == Space.RED else 40 * blue_mineable - 20 * red_mineable
+        len_our_mineable = len(board.mineable_by_player(color))
+        other_color = Space.RED if color == Space.BLUE else Space.BLUE
+        len_other_mineable = len(board.mineable_by_player(other_color))
+        general_weight = 40 * len_our_mineable - 20 * len_other_mineable
+        
+        if len_our_mineable == 0: 
+            general_weight -= 1000000000 
+        if len_other_mineable == 0: 
+            general_weight += 1000000000
+
         return general_weight + self.evaluate_walking(prev_board, board, color)
 
     def evaluate_walking(self, prev_board: Board, board: Board, color: Space) -> float:
@@ -119,12 +125,12 @@ class bot2:
                 if self.distance(us, walkable) == 1:
                     walking_weight += 15
         
-        return walking_weight + 50 * self.closest_teammate(color, board) - 3 * self.closest_teammate(other_color, board) - 100 * len(board.mineable_by_player(other_color))
+        return walking_weight - 100 * len(board.mineable_by_player(other_color))
 
     def distance(self, start: Coordinate, dest: Coordinate) -> int:
         return max(abs(start[0] - dest[0]), abs(start[1] - dest[1]), abs(-start[0] - start[1] - (-dest[0] - dest[1])))
 
-    def closest_teammate(self, color: Space, board: Board) -> float:
+    """def closest_teammate(self, color: Space, board: Board) -> float:
         min_dist = math.inf
         ours = board.find_all(color)
         for us in ours:
@@ -133,8 +139,17 @@ class bot2:
                     min_dist = min(min_dist, self.distance(us, other))
         return min_dist if min_dist != math.inf else 0
 
+    def farthest_teammate(self, color: Space, board: Board) -> float:
+        max_dist = 0
+        ours = board.find_all(color)
+        for us in ours:
+            for other in ours:
+                if us != other:
+                    max_dist = max(max_dist, self.distance(us, other))
+        return max_dist"""
+
     def mine(self, board: Board, color: Space) -> Coordinate:
-        return self.minimax(board, board, 1, -math.inf, math.inf, True, color)[0]
+        return self.minimax(board, board, 3, -math.inf, math.inf, True, color)[0]
 
     def move(self, board: Board, color: Space) -> tuple[Coordinate, Coordinate] | None:
-        return self.movemax(board, board, 1, -math.inf, math.inf, True, color)[0]
+        return self.movemax(board, board, 3, -math.inf, math.inf, True, color)[0]

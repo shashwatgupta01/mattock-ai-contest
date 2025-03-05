@@ -219,7 +219,7 @@ class bot3:
             for other in other_spaces:
                 if self.distance(us, other) == 1: 
                     walking_weight += 150
-            for walkable in board.walkable_by_player(Space.RED): 
+            for walkable in board.walkable_by_player(color): 
                 if self.distance(us, walkable) == 1: 
                     walking_weight += 15
                 
@@ -265,10 +265,10 @@ class bot3:
         return out
     
     def mine(self, board: Board, color: Space) -> Coordinate:
-        return self.minimax(board, board, 2, -float('inf'), float('inf'), True, color)[0] #Does this run the minimax twice for mine and move? We could probably speed up by just running once and saving the moves locally then making them. 
+        return self.minimax(board, board, 1, -float('inf'), float('inf'), True, color)[0] #Does this run the minimax twice for mine and move? We could probably speed up by just running once and saving the moves locally then making them. 
     
     def move(self, board: Board, color: Space) -> tuple[Coordinate, Coordinate] | None:
-        return self.movemax(board, board, 2, -float('inf'), float('inf'), True, color)[0]
+        return self.movemax(board, board, 1, -float('inf'), float('inf'), True, color)[0]
 
     
     def closest_teammate(self, color: Space, board: Board) -> float:

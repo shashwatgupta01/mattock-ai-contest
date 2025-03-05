@@ -99,11 +99,11 @@ class bot:
         
     def evaluate(self, prev_board: Board, board: Board, color: Space) -> float:
         red_spaces = board.find_all(Space.RED)
-        prev_red_spaces = prev_board.find_all(Space.RED)
+        #prev_red_spaces = prev_board.find_all(Space.RED)
         blue_spaces = board.find_all(Space.BLUE)
-        prev_blue_spaces = prev_board.find_all(Space.BLUE)
-        red_last_mineable = prev_board.mineable_by_player(Space.RED)
-        blue_last_mineable = prev_board.mineable_by_player(Space.BLUE)
+        #prev_blue_spaces = prev_board.find_all(Space.BLUE)
+        #red_last_mineable = prev_board.mineable_by_player(Space.RED)
+        #blue_last_mineable = prev_board.mineable_by_player(Space.BLUE)
         red_mineable = board.mineable_by_player(Space.RED)
         blue_mineable = board.mineable_by_player(Space.BLUE)
         red_mineable_len = len(red_mineable)
@@ -113,7 +113,7 @@ class bot:
         blue_player_dead = False
         dead_weight = 0
         general_weight = 0
-        mined_space_value = 0
+        #mined_space_value = 0
         walking_weight = self.evaluate_walking(prev_board, board, color)
 
         '''for mined in self.closest_enemy(prev_board, color):
@@ -134,18 +134,18 @@ class bot:
             if red_player_dead: 
                 walking_weight -= 1000"""
 
-            general_weight += red_mineable_len * 4
-            general_weight -= blue_mineable_len * 2
+            general_weight += red_mineable_len * 40
+            general_weight -= blue_mineable_len * 20
             if red_mineable_len == 0:
-                general_weight -= 10000
+                general_weight -= 100000
             if blue_mineable_len == 0:
-                general_weight += 10000
+                general_weight += 100000
             
 
             if red_player_dead: 
-                dead_weight -= 3
+                dead_weight -= 300
             elif blue_player_dead: 
-                dead_weight += 3
+                dead_weight += 300
 
         if color == Space.BLUE:
             
@@ -154,58 +154,46 @@ class bot:
             if red_player_dead: 
                 walking_weight += 1000"""
             
-            general_weight -= red_mineable_len * 2
-            general_weight += blue_mineable_len * 4
+            general_weight -= red_mineable_len * 20
+            general_weight += blue_mineable_len * 40
             if blue_mineable_len == 0:
-                general_weight -= 10000
+                general_weight -= 100000
             if red_mineable_len == 0:
-                general_weight += 10000
+                general_weight += 100000
 
             if blue_player_dead: 
-                dead_weight -= 3
+                dead_weight -= 300
             elif red_player_dead: 
-                dead_weight += 3
+                dead_weight += 300
         # next to opponent (also do next to opponent and mineable_by_player spaces increases)
 
         return dead_weight + walking_weight + general_weight
     
 
     def evaluate_walking(self, prev_board: Board, board: Board, color: Space) -> float:
-        red_spaces = board.find_all(Space.RED)
-        prev_red_spaces = prev_board.find_all(Space.RED)
-        blue_spaces = board.find_all(Space.BLUE)
-        prev_blue_spaces = prev_board.find_all(Space.BLUE)
-        walking_weight = 0 
         if color == Space.BLUE: 
             other_color = Space.RED 
         else: 
             other_color = Space.BLUE
-        if color == Space.RED: 
-            """if len(prev_blue_spaces) > len(blue_spaces): 
-                walking_weight += 1000 
-            if len(prev_red_spaces) > len(red_spaces): 
-                walking_weight -= 1000"""
-            for us in red_spaces: 
-                for other in blue_spaces:
-                    if self.distance(us, other) == 1: 
-                        walking_weight += 150
-                for walkable in board.walkable_by_player(Space.RED): 
-                    if self.distance(us, walkable) == 1: 
-                        walking_weight += 15
-        else: 
-            """if len(prev_blue_spaces) > len(blue_spaces): 
-                walking_weight -= 1000 
-            if len(prev_red_spaces) > len(red_spaces): 
-                walking_weight += 1000"""
-            for us in blue_spaces: 
-                for other in red_spaces:
-                    if self.distance(us, other) == 1: 
-                        walking_weight += 150
-                for walkable in board.walkable_by_player(Space.BLUE): 
-                    if self.distance(us, walkable) == 1: 
-                        walking_weight += 15 
+        our_spaces = board.find_all(color)
+        prev_our_spaces = prev_board.find_all(color)
+        other_spaces = board.find_all(other_color)
+        prev_other_spaces = prev_board.find_all(Space.BLUE)
+        walking_weight = 0 
+        if len(prev_other_spaces) > len(other_spaces): 
+            walking_weight += 1000 
+        if len(prev_our_spaces) > len(our_spaces): 
+            walking_weight -= 1000
+        for us in our_spaces: 
+            for other in other_spaces:
+                if self.distance(us, other) == 1: 
+                    walking_weight += 300
+            for walkable in board.walkable_by_player(color): 
+                if self.distance(us, walkable) == 1: 
+                    walking_weight += 300
                 
-        return walking_weight + 3 * self.closest_teammate(color, board) - 3 * self.closest_teammate(other_color, board)
+        return walking_weight + 5 * self.closest_teammate(color, board) - 3 * self.closest_teammate(other_color, board) - 100 * len(board.mineable_by_player(other_color))
+
 
     def distance(self, start: Coordinate, dest: Coordinate) -> int:
         q_diff = abs(start[0] - dest[0])
@@ -214,7 +202,7 @@ class bot:
         return max(q_diff, r_diff, s_diff)
         
     
-    def closest_enemy(self, board: Board, color: Space) -> list[tuple[Coordinate, int]]: 
+    """def closest_enemy(self, board: Board, color: Space) -> list[tuple[Coordinate, int]]: 
         out: list[tuple[Coordinate, int]] = []
         mineable_red = board.mineable_by_player(Space.RED)
         mineable_blue = board.mineable_by_player(Space.BLUE)
@@ -244,13 +232,14 @@ class bot:
                 if i == 2: 
                     curr_value *= -1
                 out.append((coordinates[i][0], curr_value)) 
-        return out
+        return out"""
     
     def mine(self, board: Board, color: Space) -> Coordinate:
-        return self.minimax(board, board, 2, -float('inf'), float('inf'), True, color)[0] #Does this run the minimax twice for mine and move? We could probably speed up by just running once and saving the moves locally then making them. 
+        return self.minimax(board, board, 1, -float('inf'), float('inf'), True, color)[0]
+        #Does this run the minimax twice for mine and move? We could probably speed up by just running once and saving the moves locally then making them. 
     
     def move(self, board: Board, color: Space) -> tuple[Coordinate, Coordinate] | None:
-        return self.minimax(board, board, 2, -float('inf'), float('inf'), True, color)[1]
+        return self.minimax(board, board, 1, -float('inf'), float('inf'), True, color)[1]
 
     
     def closest_teammate(self, color: Space, board: Board) -> float:
@@ -263,7 +252,7 @@ class bot:
                     if current < min and current > 0: 
                         min = current
         else: 
-            blue_spaces = board.find_all(Space.RED) 
+            blue_spaces = board.find_all(Space.BLUE) 
             for us in blue_spaces: 
                 for other in blue_spaces: 
                     current = self.distance(us, other)
